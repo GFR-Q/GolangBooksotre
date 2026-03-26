@@ -1,8 +1,7 @@
-package mainpackage
+package main
 
 import (
 	"bookstore/handlers"
-
 	"github.com/gin-gonic/gin"
 )
 
