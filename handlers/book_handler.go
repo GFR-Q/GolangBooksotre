@@ -10,7 +10,7 @@ import (
 
 var books = []models.Book{
 	{ID: 1, Title: "The Go Programming Language", AuthorID: 1, CategoryID: 1, Price: 35.50},
-	{ID: 2, Title: "Clean Code", AuthorID: 2, CategoryID: 1, Price: 42.00},
+	{ID: 2, Title: "Clean Code", AuthorID: 2, CategoryID: 2, Price: 42.00},
 }
 var nextBookID = 3
 
