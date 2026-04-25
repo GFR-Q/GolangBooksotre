@@ -11,6 +11,7 @@ import (
 func main() {
 	database.InitDB()
 	database.DB.AutoMigrate(
+		&models.User{},
 		&models.Book{},
 		&models.Author{},
 		&models.Category{},
@@ -18,12 +19,11 @@ func main() {
 	)
 
 	r := gin.Default()
-	r.GET("/books", handlers.GetBooks)
-	r.POST("/books", handlers.CreateBook)
-	r.GET("/books/:id", handlers.GetBookByID)
 
-	r.GET("/authors", handlers.GetAuthors)
-	r.POST("/authors", handlers.CreateAuthor)
+	r.POST("/register", handlers.Register)
+	r.POST("/login", handlers.Login)
+	r.GET("/books", handlers.GetBooks)
+
 	favRoutes := r.Group("/books")
 	favRoutes.Use(handlers.AuthMiddleware())
 	{

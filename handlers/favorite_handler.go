@@ -9,33 +9,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func GetFavorites(c *gin.Context) {
-	userID, _ := c.Get("user_id")
-
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
-	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
-	offset := (page - 1) * limit
-
-	var favBooks []models.Book
-
-	err := database.DB.Table("books").
-		Joins("JOIN favorite_books ON favorite_books.book_id = books.id").
-		Where("favorite_books.user_id = ?", userID).
-		Limit(limit).Offset(offset).
-		Find(&favBooks).Error
-
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Ошибка базы данных"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"page":  page,
-		"limit": limit,
-		"data":  favBooks,
-	})
-}
-
 func AddFavorite(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 	bookID, _ := strconv.Atoi(c.Param("id"))
@@ -46,17 +19,31 @@ func AddFavorite(c *gin.Context) {
 	}
 
 	if err := database.DB.Create(&fav).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Книга уже в избранном или не существует"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Уже в избранном"})
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Добавлено в избранное"})
+	c.JSON(http.StatusOK, gin.H{"message": "Added to favorites"})
 }
 func RemoveFavorite(c *gin.Context) {
 	userID, _ := c.Get("user_id")
 	bookID, _ := strconv.Atoi(c.Param("id"))
 
 	database.DB.Where("user_id = ? AND book_id = ?", userID, bookID).Delete(&models.FavoriteBook{})
+	c.JSON(http.StatusOK, gin.H{"message": "Removed"})
+}
+func GetFavorites(c *gin.Context) {
+	userID, _ := c.Get("user_id")
 
-	c.JSON(http.StatusOK, gin.H{"message": "Удалено из избранного"})
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "10"))
+	offset := (page - 1) * limit
+
+	var books []models.Book
+	database.DB.Table("books").
+		Joins("JOIN favorite_books ON favorite_books.book_id = books.id").
+		Where("favorite_books.user_id = ?", userID).
+		Limit(limit).Offset(offset).
+		Find(&books)
+
+	c.JSON(http.StatusOK, books)
 }
